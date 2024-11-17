@@ -1,0 +1,9 @@
+/* src/components/Sidebar.css */
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    height: 100vh;
+    padding: 20px;
+  }
+  
