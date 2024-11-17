@@ -55,6 +55,7 @@ async def read_loads(state: str):
             "time" : "latest"
         }
         data = requests.get(url, headers=headers, params=params).json()
+        print(data)
         load = data['data'][0]['load']
         return load
     else:

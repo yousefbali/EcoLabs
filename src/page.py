@@ -1,3 +1,4 @@
+from time import sleep
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -19,10 +20,11 @@ states = ["AL", "AZ", "AR", "CA",
 st.write("# Welcome to EcoLabs")
 
 
-
+state_name = st.sidebar.selectbox("Choose your state", states)
+st.sidebar.write("By selecting your state we will tell you more about the electricity grid in your area!")
 
 # FastAPI base URL
-base_url = "http://127.0.0.1:8000/best_time?state=TX"
+base_url = "http://127.0.0.1:8000/"
 
 # Fetch data from FastAPI
 def fetch_best_time(state):
@@ -44,6 +46,29 @@ def fetch_fuel_mix(state):
         st.error(f"Error fetching data: {response.status_code}")
         return None
 
+def fetch_load(state):
+    url = f"{base_url}/loads?state={state}"
+    response = requests.get(url)
+    print(response)
+    if response.status_code == 200:
+        return response.json()  # Assuming FastAPI returns ISO timestamp
+    else:
+        st.error(f"Error fetching data: {response.status_code}")
+        return None
+
+# This does not work
+# st.success(fetch_best_time(state_name))
+
+row = st.columns(3)
+
+def add_row(row):
+    with row[0]:
+        st.success(f"State selected: {fetch_best_time(state_name)}")
+        sleep(2)
+    with row[1]:
+        st.success(f"Grid load: {fetch_load(state_name)}")
+
+add_row(row)
 # Fetch and display the best time to use electricity
 # st.subheader("Best Time for Renewable Usage")
 # if st.button("Get Best Time"):
@@ -78,5 +103,3 @@ def fetch_fuel_mix(state):
 
 
 
-state_name = st.sidebar.selectbox("Choose your state", states)
-st.sidebar.write("By selecting your state we will tell you more about the electricity grid in your area!")
