@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pgeocode import Nominatim
 import requests
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import time
 import config
 
@@ -31,13 +31,12 @@ async def read_fuel_mix(state: str):
         iso = isos[state]
         url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
         params = {
-            "start_time" : datetime.combine(datetime.now(), datetime.min.time()).strftime("%Y-%m-%d %H:%M:%S"),
-            "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "start_time" : datetime.combine(datetime.now(tz=timezone.utc), datetime.min.time()).strftime("%Y-%m-%d %H:%M:%S"),
+            "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         data = requests.get(url, headers=headers, params=params).json()
-        load = data['data'][0]['load']
-        return load
-        
+        fuel_mix = data['data']
+        return fuel_mix
     else:
         return -1
 
@@ -47,12 +46,13 @@ async def read_loads(state: str):
         iso = isos[state]
         url = f"https://api.gridstatus.io/v1/datasets/{iso}_load/query"
         params = {
-            "start_time" : (datetime.now() - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S"),
-            "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "time" : "latest"
         }
-        return requests.get(url, headers=headers, params=params)
+        data = requests.get(url, headers=headers, params=params).json()
+        load = data['data'][0]['load']
+        return load
     else:
-        return []
+        return -1
 
 @app.get("/main-source")
 async def read_main_source(state: str):
@@ -60,10 +60,24 @@ async def read_main_source(state: str):
         iso = isos[state]
         url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
         params = {
-            "start_time" : (datetime.now() - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S"),
-            "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "time" : "latest"
         }
         response = requests.get(url, headers=headers, params=params)
         data = response.json()
-        return data
-        
+        fuel_mix = data['data'][0]
+        max = float('-inf')
+        main_source = ""
+        for fuel, use in fuel_mix.items():
+            if fuel == 'interval_start_utc' or fuel == 'interval_end_utc':
+                continue
+            if int(use) > max:
+                max = int(use)
+                main_source = fuel
+                
+            name = main_source.split('_')
+            name = [a.capitalize() for a in name]
+            
+        return ' '.join(name)
+            
+    else:
+        return ""
