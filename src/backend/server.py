@@ -25,16 +25,6 @@ headers = {
     "x-api-key" : config.grid_status_api_key
 }
 
-iso = isos["TX"]
-url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
-params = {
-    "start_time" : (datetime.now() - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S"),
-    "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-}
-response = requests.get(url, headers=headers, params=params)
-data = response.json()['data']
-print(data)
-
 @app.get("/fuel_mix")
 async def read_fuel_mix(state: str):
     if state in isos:
