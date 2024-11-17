@@ -453,3 +453,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/src/backend/config.py
