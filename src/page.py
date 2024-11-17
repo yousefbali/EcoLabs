@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
+import matplotlib.pyplot as plt
 from datetime import datetime
 
 states = ["AL", "AZ", "AR", "CA",
@@ -49,7 +50,15 @@ def fetch_fuel_mix(state):
 def fetch_load(state):
     url = f"{base_url}/loads?state={state}"
     response = requests.get(url)
-    print(response)
+    if response.status_code == 200:
+        return response.json()  # Assuming FastAPI returns ISO timestamp
+    else:
+        st.error(f"Error fetching data: {response.status_code}")
+        return None
+
+def fetch_main_source(state):
+    url = f"{base_url}/main_source?state={state}"
+    response = requests.get(url)
     if response.status_code == 200:
         return response.json()  # Assuming FastAPI returns ISO timestamp
     else:
@@ -63,43 +72,57 @@ row = st.columns(3)
 
 def add_row(row):
     with row[0]:
-        st.success(f"State selected: {fetch_best_time(state_name)}")
+        st.success(f"Best time to use energy: {fetch_best_time(state_name)}")
         sleep(2)
     with row[1]:
         st.success(f"Grid load: {fetch_load(state_name)}")
+        sleep(2)
+    with row[2]:
+        st.success(f"Main source: {fetch_main_source(state_name)}")
+        sleep(2)
 
+sleep(2)
 add_row(row)
-# Fetch and display the best time to use electricity
-# st.subheader("Best Time for Renewable Usage")
-# if st.button("Get Best Time"):
-#     best_time = fetch_best_time(state)
-#     if best_time:
-#         # Format and display the best time
-#         best_time_dt = datetime.fromisoformat(best_time)
-#         st.success(f"The best time for renewable usage in {state} is: {best_time_dt.strftime('%Y-%m-%d %H:%M:%S')}")
-#
-# # Fetch and display fuel mix data
-# st.subheader("Fuel Mix Data")
-# if st.checkbox("Show Fuel Mix"):
-#     fuel_mix_data = fetch_fuel_mix(state)
-#     if fuel_mix_data:
-#         st.write(f"Fuel mix data for {state}:")
-#         st.json(fuel_mix_data)  # Display raw JSON
 
+st.subheader("Fuel Mix Data")
+fuel_mix_data = fetch_fuel_mix(state_name)
+df = pd.DataFrame(fuel_mix_data)
 
+col_list = []
+name_list = []
+for name, val in fuel_mix_data[0].items():
+    if name != 'interval_start_utc' and name != 'interval_end_utc':
+        col_list.append(df[name].to_list())
+        name_list.append(name)
 
+df['time'] = df['interval_start_utc'].str[11:16]
 
+fig, ax = plt.subplots()
+for col in col_list:
+    ax.plot( df['time'].to_list(), col)
 
+ax.set_xlabel('Time')
+ax.set_ylabel('Fuel Mix')
+ax.legend(name_list)
+plt.tick_params(left = False, right = False , labelleft = False , 
+                labelbottom = False, bottom = False) 
+st.pyplot(fig)
 
+# for fuel_mix_data:
+#     # Prepare data for visualization
+#     fuel_mix = fuel_mix_data.get("fuel_mix", {})
+#     if fuel_mix:
+#         df = pd.DataFrame(list(fuel_mix.items()), columns=["Fuel Type", "Percentage"])
 
+#         # Display as a bar chart using Streamlit
+#         st.bar_chart(data=df.set_index("Fuel Type"))
 
-
-
-
-
-
-
-
-
-
-
+#         # Custom Matplotlib Visualization
+#         st.write("### Fuel Mix Breakdown")
+#         fig, ax = plt.subplots()
+#         ax.bar(df["Fuel Type"], df["Percentage"], color="skyblue")
+#         ax.set_title(f"Fuel Mix in {state_name}")
+#         ax.set_xlabel("Fuel Type")
+#         ax.set_ylabel("Percentage")
+#         plt.xticks(rotation=45)
+#         st.pyplot(fig)

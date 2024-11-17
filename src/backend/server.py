@@ -1,14 +1,9 @@
-
-
 from fastapi import FastAPI
 from pgeocode import Nominatim
 import requests
 from datetime import datetime, date, timedelta, timezone
 import time
 import config
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from pytz import timezone
 
 app = FastAPI()
 
@@ -55,7 +50,6 @@ async def read_loads(state: str):
             "time" : "latest"
         }
         data = requests.get(url, headers=headers, params=params).json()
-        print(data)
         load = data['data'][0]['load']
         return load
     else:
@@ -122,61 +116,3 @@ async def best_time_usage(state: str):
                 best_time = stamp['interval_start_utc']
         
         return best_time
-
-
-
-
-#
-#
-#         from datetime import datetime, timedelta, timezone
-#         from zoneinfo import ZoneInfo
-#         import requests
-#         from fastapi import FastAPI
-#
-#         app = FastAPI()
-#
-#         isos = {
-#             "TX": "ercot",  # Example for Texas
-#             # Add more state mappings
-#         }
-#
-#         headers = {
-#             "x-api-key": "your_api_key"
-#         }
-#
-#         @app.get("/best_time")
-#         async def best_time_usage(state: str):
-#             if state in isos:
-#                 iso = isos[state]
-#                 url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
-#                 params = {
-#                     "start_time": (datetime.now(tz=timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
-#                 }
-#                 response = requests.get(url, headers=headers, params=params).json()
-#                 fuel_mix = response['data']
-#
-#                 renewables = ["geothermal", "hydro", "solar", "wind", "biomass"]
-#                 max_ratio = float('-inf')
-#                 best_time_utc = None
-#
-#                 for stamp in fuel_mix:
-#                     renew_val = 0
-#                     total_val = 0
-#                     for fuel, use in stamp.items():
-#                         if fuel in renewables:
-#                             renew_val += use
-#                         total_val += use
-#                     if total_val > 0:
-#                         curr_ratio = renew_val / total_val
-#                         if curr_ratio > max_ratio:
-#                             max_ratio = curr_ratio
-#                             best_time_utc = stamp['interval_start_utc']  # UTC timestamp
-#
-#                 if best_time_utc:
-#                     # Convert UTC to Central Time
-#                     best_time_ct = datetime.fromisoformat(best_time_utc).replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Chicago"))
-#                     return {"best_time_ct": best_time_ct.strftime("%Y-%m-%d %H:%M:%S")}
-#                 else:
-#                     return {"error": "No data available"}
-#
-#             return {"error": "Invalid state"}
