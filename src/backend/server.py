@@ -25,6 +25,7 @@ headers = {
     "x-api-key" : config.grid_status_api_key
 }
 
+# Returns a list of dictionaries with data from start of current day to current time
 @app.get("/fuel_mix")
 async def read_fuel_mix(state: str):
     if state in isos:
@@ -40,6 +41,7 @@ async def read_fuel_mix(state: str):
     else:
         return -1
 
+# Returns the current load of the state grid (int)
 @app.get("/loads")
 async def read_loads(state: str):
     if state in isos:
@@ -54,6 +56,7 @@ async def read_loads(state: str):
     else:
         return -1
 
+# Returns current (latest) main source of fuel for the given state (str)
 @app.get("/main-source")
 async def read_main_source(state: str):
     if state in isos:
