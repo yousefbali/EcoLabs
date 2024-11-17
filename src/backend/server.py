@@ -57,7 +57,7 @@ async def read_loads(state: str):
         return -1
 
 # Returns current (latest) main source of fuel for the given state (str)
-@app.get("/main-source")
+@app.get("/main_source")
 async def read_main_source(state: str):
     if state in isos:
         iso = isos[state]
