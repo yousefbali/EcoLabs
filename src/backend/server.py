@@ -33,7 +33,6 @@ async def read_fuel_mix(state: str):
         url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
         params = {
             "start_time" : datetime.combine(datetime.now(tz=timezone.utc), datetime.min.time()).strftime("%Y-%m-%d %H:%M:%S"),
-            "end_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         data = requests.get(url, headers=headers, params=params).json()
         fuel_mix = data['data']
@@ -84,3 +83,36 @@ async def read_main_source(state: str):
             
     else:
         return ""
+
+@app.get("/best_time")
+async def best_time_usage(state: str):
+    if state in isos:
+        iso = isos[state]
+        url = f"https://api.gridstatus.io/v1/datasets/{iso}_fuel_mix/query"
+        params = {
+            "start_time" : (datetime.now(tz=timezone.utc) - timedelta(days = 1)).strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        data = requests.get(url, headers=headers, params=params).json()
+        fuel_mix = data['data']
+        renewables = ["geothermal", "hydro", "large_hydro", "other_renewables", "solar", "small_hydro", "wind", "refuse", "landfill_gas", "wood", "biogas", "biomass", "waste_disposal_services", "waste_heat"]
+        
+        max_ratio = float('-inf')
+        best_time = datetime.now()
+        
+        for stamp in fuel_mix:
+            renew_val = 0
+            total_val = 0
+            for fuel, use in stamp.items():
+                if fuel == 'interval_start_utc' or fuel == 'interval_end_utc':
+                    continue
+                if fuel in renewables:
+                    renew_val += use
+                
+                total_val += use
+            
+            curr_ratio = renew_val/total_val
+            if curr_ratio > max_ratio:
+                max_ratio = curr_ratio
+                best_time = stamp['interval_start_utc']
+        
+        return best_time
