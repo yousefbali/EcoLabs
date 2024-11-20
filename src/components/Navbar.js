@@ -1,10 +1,10 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 function Navbar() {
   const location = useLocation();
-
+  console.log("Rendering Navbar");  // Debug log
   // Function to determine the page name based on the current path
   const getPageName = () => {
     switch (location.pathname) {
@@ -16,8 +16,6 @@ function Navbar() {
         return 'Reports';
       case '/profile':
         return 'Profile';
-      case '/logout':
-        return 'Logout';
       default:
         return 'Dashboard';
     }
@@ -25,11 +23,17 @@ function Navbar() {
 
   return (
     <div className="navbar">
-      <h2>Welcome to the {getPageName()}</h2>
+      <h2>{getPageName()}</h2>
       <div className="user-info">
-        <span>Username</span>
-        <img src="https://via.placeholder.com/30" alt="user" />
+        <span>EcoLabs</span>
+        
       </div>
+
+      {/* Navigation Links */}
+      <nav className="navbar-links">
+        
+        <NavLink to="/logout" activeClassName="active-link">Logout</NavLink>
+      </nav>
     </div>
   );
 }

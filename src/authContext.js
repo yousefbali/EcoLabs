@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect } from "react";
-import { onAuthStateChanged } from "./auth";
-import { auth } from "./firebase";
+import React, { useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase'; 
 
 const AuthContext = React.createContext();
 
@@ -14,20 +14,21 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, initializeUser); // corrected reference to function
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log("Auth state changed. User:", user); // Log auth state change
+            if (user) {
+                console.log("User is logged in:", user);
+                setCurrentUser(user);
+                setUserLoggedIn(true);
+            } else {
+                console.log("No user logged in");
+                setCurrentUser(null);
+                setUserLoggedIn(false);
+            }
+            setLoading(false);
+        });
         return unsubscribe;
     }, []);
-
-    async function initializeUser(user) { // corrected function name
-        if (user) {
-            setCurrentUser({ ...user });
-            setUserLoggedIn(true);
-        } else {
-            setCurrentUser(null);
-            setUserLoggedIn(false);
-        }
-        setLoading(false);
-    }
 
     const value = {
         currentUser,

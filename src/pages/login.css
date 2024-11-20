@@ -21,7 +21,7 @@
   
   /* Title */
   .login-form h3 {
-    color: #333;
+    color: #53d15c;
     font-size: 1.8rem;
     margin-bottom: 1rem;
     font-weight: bold;
@@ -53,7 +53,7 @@
     padding: 12px;
     font-size: 1rem;
     font-weight: bold;
-    background-color: #007bff;
+    background-color: #53d15c;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -62,7 +62,7 @@
   }
   
   .login-form button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #48b64f;
   }
   
   /* Error message styling */
@@ -79,7 +79,7 @@
   }
   
   .login-form p a {
-    color: #007bff;
+    color: #53d15c;
     font-weight: bold;
     text-decoration: none;
   }

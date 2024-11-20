@@ -1,10 +1,38 @@
-/* src/components/Navbar.css */
 .navbar {
-    background-color: #444;
-    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 1rem;
+    background-color: #333;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+  }
+  
+  .navbar h2 {
+    margin: 0;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .navbar-links a {
+    color: white;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+  }
+  
+  .navbar-links .active-link {
+    font-weight: bold;
+    border-bottom: 2px solid #fff;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   
